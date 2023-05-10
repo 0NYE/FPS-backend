@@ -3,6 +3,14 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+#jump to flask
+.idea
+pybo.db
+*.pyc
+__pycache__
+migrations
+logs
+
 # C extensions
 *.so
 
