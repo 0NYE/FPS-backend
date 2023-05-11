@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Image Upload Example</title>
+  </head>
+  <body>
+    <form method="post" enctype="multipart/form-data" action="{{ url_for('image.compare_image') }}">
+      <label for="image1">Image 1:</label>
+      <input type="file" id="image1" name="image1"><br><br>
+      <label for="image2">Image 2:</label>
+      <input type="file" id="image2" name="image2"><br><br>
+      <input type="submit" value="Submit">
+    </form>
+  </body>
+</html>

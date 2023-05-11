@@ -8,25 +8,26 @@ from skimage import io
 from flask import Blueprint, request, jsonify
 import requests
 import cv2
+import numpy as np
 
 bp = Blueprint('image', __name__, url_prefix='/image')
 
-@bp.route('/compare', methods = ['GET', ])
+@bp.route('/compare', methods = ['POST'])
 def compare_image():
     # TEST
-    origin = "image_similarity/modified.png"
-    modify = "image_similarity/original.png"
+    file1 = request.files['image1']
+    file2 = request.files['image2']
     
-    # origin = str(request.files['origin'])
-    # modify = str(request.files['modify'])
+    origin = cv2.imdecode(np.frombuffer(file1.read(), np.uint8), cv2.IMREAD_COLOR)
+    modify = cv2.imdecode(np.frombuffer(file2.read(), np.uint8), cv2.IMREAD_COLOR)
 
     # 만약 url에서 불러올 거면 다음을 활용
-    imageA = cv2.imread(origin)
-    imageB = cv2.imread(modify)
+    # imageA = cv2.imread(origin)
+    # imageB = cv2.imread(modify)
 
     # 4. Convert the images to grayscale
-    grayA = cv2.cvtColor(imageA, cv2.COLOR_BGR2GRAY)
-    grayB = cv2.cvtColor(imageB, cv2.COLOR_BGR2GRAY)
+    grayA = cv2.cvtColor(origin, cv2.COLOR_BGR2GRAY)
+    grayB = cv2.cvtColor(modify, cv2.COLOR_BGR2GRAY)
 
     # 5. Compute the Structural Similarity Index (SSIM) between the two
     #    images, ensuring that the difference image is returned
@@ -47,8 +48,8 @@ def compare_image():
         area = cv2.contourArea(c)                           # contour의 영역 계산
         if area > 50:                                       # count 값이 작으면 무시, 크면 박스 생성
             x, y, w, h = cv2.boundingRect(c)
-            cv2.rectangle(imageA, (x, y), (x + w, y + h), (0, 0, 255), 2)
-            cv2.rectangle(imageB, (x, y), (x + w, y + h), (0, 0, 255), 2)
+            cv2.rectangle(origin, (x, y), (x + w, y + h), (0, 0, 255), 2)
+            cv2.rectangle(modify, (x, y), (x + w, y + h), (0, 0, 255), 2)
     
     return jsonify({
         "SSIM" : str(score)
