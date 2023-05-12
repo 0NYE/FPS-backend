@@ -6,3 +6,8 @@ bp = Blueprint('main', __name__, url_prefix='/')
 @bp.route('/')
 def index():
     return render_template('index.html')
+
+@bp.route('/result')
+def result():
+    return render_template('result.html', image_file="image/test.jpg")
+    

@@ -5,7 +5,7 @@ def create_app():
     app = Flask(__name__)
     
     # blueprint-image
-    from image_similarity import image_similarity_visual
+    from views.image_similarity import image_similarity_visual
     app.register_blueprint(image_similarity_visual.bp)
     
     from views import main_views
