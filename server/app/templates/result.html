@@ -5,6 +5,7 @@
   <body>
     {% if True %}
     <img src="{{ url_for('static', filename=image_file) }}">
+    <p>SSIM : {{ssim}}</p>
     {% endif %}
   </body>
 </html>
