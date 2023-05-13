@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# 가상 환경
+venvs
+
 #jump to flask
 .idea
 pybo.db
