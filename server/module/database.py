@@ -36,26 +36,3 @@ class Database:
 
     def close(self):
         self.cursor.close()
-        
-        
-# pymysql로 쿼리문 테스트 -> 230514 테스트 완료
-'''
-database = Database()
-
-sql = """ 
-    CREATE TABLE product(
-        PRODUCT_CODE VARCHAR(20) NOT NULL,
-        TITLE VARCHAR(200) NOT NULL,
-        ORI_PRICE INT,
-        DISCOUNT_PRICE INT,
-        DISCOUNT_PERCENT INT,
-        DELIVERY VARCHAR(2),
-        PRIMARY KEY(PRODUCT_CODE)
-);
-"""
-database.execute(sql) 
-
-database.commit() 
-
-database.close()
-'''
