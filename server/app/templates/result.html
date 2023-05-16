@@ -1,12 +1,12 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-  </head>
-  <body>
-    {% if True %}
-    <img src="{{ url_for('static', filename=image_file) }}">
-    <p>SSIM : {{ssim}}</p>
-    {% endif %}
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <title>Image and Score</title>
+</head>
+<body>
+  <img src="{{ url_for('static', filename=image_file) }}">
+  <p>SSIM: {{ score }}</p>
+</body>
 </html>
 
