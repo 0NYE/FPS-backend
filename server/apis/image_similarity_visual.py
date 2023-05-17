@@ -8,10 +8,12 @@ from skimage import io
 from flask import request, send_file, jsonify, render_template
 from flask_restx import Namespace, Resource
 from werkzeug.utils import secure_filename
+
 import cv2
 import numpy as np
 import os
-compare = Namespace('compare', description="이미지 비교")
+
+compare = Namespace(name='compare', description="이미지 비교")
 
 @compare.route('')
 class compare_image(Resource):
@@ -21,9 +23,9 @@ class compare_image(Resource):
         file1 = request.files['image1']
         file2 = request.files['image2']
         
-        # 현재 절대경로로 밖에 안되서 나중에 수정 필요
-        image_path = 'static/image/modifyResult.png'
-        image_path = 'C:/Project/ONYE_FPS/FPS-backend/server/app/static/image/modifyResult.png'
+        # 작업 경로(server) + 위치로 설정
+        cwd = os.getcwd()
+        image_path = cwd+"/app/static/image/modifyResult.png"
         
         origin = cv2.imdecode(np.frombuffer(file1.read(), np.uint8), cv2.IMREAD_COLOR)
         modify = cv2.imdecode(np.frombuffer(file2.read(), np.uint8), cv2.IMREAD_COLOR)
