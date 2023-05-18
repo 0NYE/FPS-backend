@@ -33,7 +33,7 @@ def image_compare(file1, file2):
         diff = (diff * 255).astype("uint8")
 
         # print only the score if you want
-        print("SSIM: {}".format(score))
+        # print("SSIM: {}".format(score))
 
         # 이진화
         thresh = cv2.threshold(diff, 100, 255, cv2.THRESH_BINARY_INV)[1]
@@ -83,8 +83,8 @@ class compare_image(Resource):
         result_submit = db.execute_all(sql_submit, val_submit)
         db.commit()
         
-        print(result_problem)
-        print(result_submit)
+        # print(result_problem)
+        # print(result_submit)
         
         # 3. html2image를 이용해서 이미지를 생성한다.
         hti = Html2Image(output_path=cwd)
