@@ -8,6 +8,8 @@ from skimage import io
 from flask import request, send_file, jsonify, render_template
 from flask_restx import Namespace, Resource
 from werkzeug.utils import secure_filename
+from module.database import Database;
+from html2image import Html2Image
 
 import cv2
 import numpy as np
