@@ -19,14 +19,13 @@ insert_fields = problem.model( 'insert', {
     'CSS_code' : fields.String(description='CSS 코드입니다.', required=True, example='-'),
     'JS_code' : fields.String(description='JS 코드입니다.', required=True, example='-'),
     'uploader' : fields.String(description='문제를 업로드한 사람의 닉네임입니다.', required=True, example='WinterHana'),
-    'image_id' : fields.String(description='문제를 랜더링한 이미지 번호입니다. 이미지 테이블과 FK 관계입니다.', required=True, example='0')
 })
 
 delete_fields = problem.model('delete', {
     'id' : fields.String(description='문제 번호', required=True, example='0')
 })
 
-@problem.route('')
+@problem.route('/list')
 class problem_list(Resource):
     @problem.response(200, '전체 내용을 가져옵니다.')
     def get(self):
@@ -35,17 +34,21 @@ class problem_list(Resource):
         
         # 만약 테이블이 없으면 새로 생성
         sql = '''
-        CREATE TABLE IF NOT EXISTS `fps`.`PROBLEM` (
-            `id` INT NOT NULL COMMENT '문제 번호',
-            `title` VARCHAR(100) NOT NULL COMMENT '문제 제목',
-            `description` VARCHAR(1000) NULL COMMENT '문제 설명',
-            `HTML_code` TEXT(60000) NULL COMMENT 'HTML 코드 내용',
-            `CSS_code` TEXT(60000) NULL COMMENT 'CSS 코드 내용',
-            `JS_code` TEXT(60000) NULL COMMENT 'JS 코드 내용',
-            `registration_date` DATE NOT NULL COMMENT '업로드한 날짜',
-            `uploader` VARCHAR(100) NOT NULL COMMENT '업로드한 사람',
-            `image_id` INT NOT NULL COMMENT '랜더링한 이미지 번호',
-            PRIMARY KEY (`id`))
+            CREATE TABLE IF NOT EXISTS `fps`.`PROBLEM` (
+	        `id` INT NOT NULL COMMENT '문제 번호',
+	        `title` VARCHAR(100) NOT NULL COMMENT '문제 제목',
+	        `description` VARCHAR(1000) NULL COMMENT '문제 설명',
+	        `HTML_code` TEXT(60000) NULL COMMENT 'HTML 코드 내용',
+	        `CSS_code` TEXT(60000) NULL COMMENT 'CSS 코드 내용',
+	        `JS_code` TEXT(60000) NULL COMMENT 'JS 코드 내용',
+	        `registration_date` DATE NOT NULL COMMENT '업로드한 날짜',
+	        `uploader` VARCHAR(100) NOT NULL COMMENT '업로드한 사람',
+	        `image_id` INT NOT NULL COMMENT '랜더링한 이미지 번호',
+            `like` INT,
+            `dislike` INT,
+            `star` INT,
+            `tag` VARCHAR(100),
+	        PRIMARY KEY (`id`))
         '''
         db.execute_all(sql)
         db.commit()
@@ -68,10 +71,11 @@ class problem_create(Resource):
         problem = request.get_json()
         
         try:
-            sql = "INSERT INTO PROBLEM VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            sql = "INSERT INTO PROBLEM VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
     
             val = (int(problem['id']), problem['title'], problem['description'], problem['HTML_code'], 
-                   problem['CSS_code'], problem['JS_code'], datetime.date.today(), problem['uploader'], int(problem['image_id']))
+                   problem['CSS_code'], problem['JS_code'], datetime.date.today(), problem['uploader'], int(problem['id']),
+                   0, 0, 0, "")
     
             db.execute_all(sql, val)
             db.commit()

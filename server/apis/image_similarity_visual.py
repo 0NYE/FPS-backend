@@ -11,6 +11,10 @@ from werkzeug.utils import secure_filename
 from module.database import Database;
 from html2image import Html2Image
 
+import asyncio
+import aiohttp
+
+from pyppeteer import launch
 import cv2
 import numpy as np
 import os
@@ -51,7 +55,14 @@ def image_compare(file1, file2):
                 cv2.rectangle(submit, (x, y), (x + w, y + h), (255, 0, 255), 2)
         
         cv2.imwrite(cwd + '/result.png', submit)
-    
+
+async def html_to_image(html_code, css_code, output_image_path):
+    browser = await launch()
+    page = await browser.newPage()
+    await page.setContent(html_code)
+    await page.addStyleTag(content=css_code)
+    await page.screenshot({'path': output_image_path})
+    await browser.close()
      
 @compare.route('')
 class compare_image(Resource):
@@ -107,6 +118,55 @@ class compare_image(Resource):
         
         compare_result_image = send_file(cwd + '/result.png', mimetype='image/png')
         return compare_result_image
+    
+        # 기본 설정
+        # db = Database()
+        # problem = request.args.get('problem')
+        # user = request.args.get('user')
+        
+        # # 작업 경로(server) + 위치로 설정
+        # cwd = os.getcwd() + "/app/static/image"
+        
+        # # 1. 문제 정보를 가져온다.
+        # sql_problem = '''
+        #     SELECT HTML_code, CSS_code FROM PROBLEM WHERE id = %s
+        # '''
+        # val_problem = (int(problem))
+        
+        # result_problem = db.execute_all(sql_problem, val_problem)
+        # db.commit()
+        
+        # # 2. 답안 정보를 가져온다.
+        # sql_submit = '''
+        #     SELECT HTML_code, CSS_code FROM SUBMIT WHERE problem_id = %s AND user_id = %s;
+        # '''
+        # val_submit = (int(problem), user)
+                
+        # result_submit = db.execute_all(sql_submit, val_submit)
+        # db.commit()
+        
+        # print(result_problem)
+        # print(result_submit)
+        
+        # # 3. html_to_image를 이용해서 이미지를 생성한다.
+        # html_problem = result_problem[0]['HTML_code']
+        # css_problem = result_problem[0]['CSS_code']
+        # html_submit = result_submit[0]['HTML_code']
+        # css_submit = result_submit[0]['CSS_code']
+        
+        # # 4. 비동기 실행
+        # output_image_path = cwd + '/problem.png'
+        # asyncio.get_event_loop().run_until_complet(html_to_image(html_problem, css_problem, output_image_path))
+        
+        # output_image_path = cwd + '/submit.png'
+        # asyncio.get_event_loop().run_until_complete(html_to_image(html_submit, css_submit, output_image_path))
+        
+        # path_problem = cwd + '/problem.png'
+        # path_submit = cwd + '/submit.png'
+        
+        # image_compare(path_problem, path_submit)
+        
+        # return send_file(cwd + '/result.png', mimetype='image/png')
     
         # cv2.imwrite(image_path, modify)
 
