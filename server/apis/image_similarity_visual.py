@@ -4,29 +4,25 @@
 
 # Import the necessary packages
 from skimage.metrics import structural_similarity as ssim
-from skimage import io
-from flask import request, send_file, jsonify, render_template
+from flask import request, send_file, jsonify, url_for
 from flask_restx import Namespace, Resource
 from werkzeug.utils import secure_filename
 from module.database import Database;
-from html2image import Html2Image
+import module.error_handler
 
-import asyncio
-import aiohttp
-
-from pyppeteer import launch
 import cv2
 import numpy as np
 import os
 
 compare = Namespace(name='compare', description="이미지 비교")
 
-def image_compare(file1, file2):
-        cwd = os.getcwd() + "/app/static/image"
-        # problem = cv2.imdecode(np.frombuffer(file1.read(), np.uint8), cv2.IMREAD_COLOR)
-        # submit = cv2.imdecode(np.frombuffer(file2.read(), np.uint8), cv2.IMREAD_COLOR)
-        problem = cv2.imread(file1)
-        submit = cv2.imread(file2)
+def image_compare(_problem, _submit):
+        img_path = os.getcwd() + "/app/static"
+        
+        print(img_path)
+        
+        problem = cv2.imdecode(np.frombuffer(_problem.read(), np.uint8), cv2.IMREAD_COLOR)
+        submit = cv2.imdecode(np.frombuffer(_submit.read(), np.uint8), cv2.IMREAD_COLOR)
         
         # grayscale로 변경
         grayA = cv2.cvtColor(problem, cv2.COLOR_BGR2GRAY)
@@ -37,7 +33,7 @@ def image_compare(file1, file2):
         diff = (diff * 255).astype("uint8")
 
         # print only the score if you want
-        # print("SSIM: {}".format(score))
+        print("SSIM: {}".format(score))
 
         # 이진화
         thresh = cv2.threshold(diff, 100, 255, cv2.THRESH_BINARY_INV)[1]
@@ -54,134 +50,41 @@ def image_compare(file1, file2):
                 cv2.rectangle(problem, (x, y), (x + w, y + h), (255, 0, 255), 2)
                 cv2.rectangle(submit, (x, y), (x + w, y + h), (255, 0, 255), 2)
         
-        cv2.imwrite(cwd + '/result.png', submit)
-
-async def html_to_image(html_code, css_code, output_image_path):
-    browser = await launch()
-    page = await browser.newPage()
-    await page.setContent(html_code)
-    await page.addStyleTag(content=css_code)
-    await page.screenshot({'path': output_image_path})
-    await browser.close()
+        cv2.imwrite(img_path + '/result.png', problem)
+    
+        return score
      
 @compare.route('')
 class compare_image(Resource):
     def post(self):
-        '''POST : query String으로 problem과 user값을 보내면 비교 사진을 전달합니다.'''
-        # 기본 설정
-        db = Database()
-        problem = request.args.get('problem')
-        user = request.args.get('user')
-        
-        # 작업 경로(server) + 위치로 설정
-        cwd = os.getcwd() + "/app/static/image"
-        
-        # 1. 문제 정보를 가져온다.
-        sql_problem = '''
-            SELECT HTML_code, CSS_code FROM PROBLEM WHERE id = %s
-        '''
-        val_problem = (int(problem))
-        
-        result_problem = db.execute_all(sql_problem, val_problem)
-        db.commit()
-        
-        # 2. 답안 정보를 가져온다.
-        sql_submit = '''
-            SELECT HTML_code, CSS_code FROM SUBMIT WHERE problem_id = %s AND user_id = %s;
-        '''
-        val_submit = (int(problem), user)
-                
-        result_submit = db.execute_all(sql_submit, val_submit)
-        db.commit()
-        
-        # print(result_problem)
-        # print(result_submit)
-        
-        # 3. html2image를 이용해서 이미지를 생성한다.
-        hti = Html2Image(output_path=cwd)
-        
-        html_problem = result_problem[0]['HTML_code']
-        css_problem = result_problem[0]['CSS_code']
-        html_submit = result_submit[0]['HTML_code']
-        css_submit = result_submit[0]['CSS_code']
-        
-        hti.screenshot(html_str=[html_problem, html_submit], 
-                       css_str=[css_problem, css_submit], 
-                       save_as=['problem.png', 'submit.png'])
-        
-        path_problem = cwd + '/problem.png'
-        path_submit = cwd + '/submit.png'
-        
-        image_compare(path_problem, path_submit)
-        
-        # compare_result_image = send_file(cwd + '/Aris.jpg', mimetype='image/png')
-        
-        compare_result_image = send_file(cwd + '/result.png', mimetype='image/png')
-        return compare_result_image
-    
-        # 기본 설정
-        # db = Database()
-        # problem = request.args.get('problem')
-        # user = request.args.get('user')
-        
-        # # 작업 경로(server) + 위치로 설정
-        # cwd = os.getcwd() + "/app/static/image"
-        
-        # # 1. 문제 정보를 가져온다.
-        # sql_problem = '''
-        #     SELECT HTML_code, CSS_code FROM PROBLEM WHERE id = %s
-        # '''
-        # val_problem = (int(problem))
-        
-        # result_problem = db.execute_all(sql_problem, val_problem)
-        # db.commit()
-        
-        # # 2. 답안 정보를 가져온다.
-        # sql_submit = '''
-        #     SELECT HTML_code, CSS_code FROM SUBMIT WHERE problem_id = %s AND user_id = %s;
-        # '''
-        # val_submit = (int(problem), user)
-                
-        # result_submit = db.execute_all(sql_submit, val_submit)
-        # db.commit()
-        
-        # print(result_problem)
-        # print(result_submit)
-        
-        # # 3. html_to_image를 이용해서 이미지를 생성한다.
-        # html_problem = result_problem[0]['HTML_code']
-        # css_problem = result_problem[0]['CSS_code']
-        # html_submit = result_submit[0]['HTML_code']
-        # css_submit = result_submit[0]['CSS_code']
-        
-        # # 4. 비동기 실행
-        # output_image_path = cwd + '/problem.png'
-        # asyncio.get_event_loop().run_until_complet(html_to_image(html_problem, css_problem, output_image_path))
-        
-        # output_image_path = cwd + '/submit.png'
-        # asyncio.get_event_loop().run_until_complete(html_to_image(html_submit, css_submit, output_image_path))
-        
-        # path_problem = cwd + '/problem.png'
-        # path_submit = cwd + '/submit.png'
-        
-        # image_compare(path_problem, path_submit)
-        
-        # return send_file(cwd + '/result.png', mimetype='image/png')
-    
-        # cv2.imwrite(image_path, modify)
+        '''POST : 두 이미지를 받아서 유사도를 비교하고 이미지 url과 점수를 반환합니다..'''
+        try:
+            # 기본 설정
+            cwd = os.getcwd() + "/app/static/image"
 
+            # 두 이미지를 받음
+            problem = request.files['problem']
+            submit = request.files['submit']
         
-        # # 1. 이미지 직접 전달을 위한 바이너리 이진화
-        # compare_result_image = send_file(image_path, mimetype='image/png')
-        # return compare_result_image
-        
-        # 2. 경로 전달
-        # response_data = {
-        #     'image' : image_path,
-        #     'ssim' : score
-        # }
-        
-        # return jsonify(response_data)
-        
-        # 3. html로 전달하기
-        # return render_template('result.html', image_file="image/modifyResult.png", ssim = score)
+            # 이미지 유사도 비교 후 비교 결과 가져오기
+            score = image_compare(problem, submit)
+
+            # 이미지 url 생성
+            image_url = url_for('static', filename = 'result.png', _external=True)
+            
+            print(image_url)
+        except:
+            module.error_handler.errer_message("Bad Request")
+            
+        return jsonify({
+            "image" : image_url,
+            "score" : score
+        })
+
+# async def html_to_image(html_code, css_code, output_image_path):
+#     browser = await launch()
+#     page = await browser.newPage()
+#     await page.setContent(html_code)
+#     await page.addStyleTag(content=css_code)
+#     await page.screenshot({'path': output_image_path})
+#     await browser.close()
