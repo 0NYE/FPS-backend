@@ -10,7 +10,7 @@ import module.error_handler
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-@bp.route('/signup/', methods=('POST'))
+@bp.route('/signup/', methods=['POST'])
 def signup():
     if request.method == 'POST':
         id = request.form['id']
@@ -26,21 +26,22 @@ def signup():
             `id` VARCHAR(30) NOT NULL,
             `password` VARCHAR(30) NOT NULL,
             `nickname` VARCHAR(30) NOT NULL,
-            PRIMARY KEY (`user_id`));
+            PRIMARY KEY (`id`));
             '''
             db.execute(sql)
             db.commit()
 
             # 회원가입시 새로운 유저 정보 등록
-            sql = '''INSERT INTO user_tb VALUES (%s,%s,%s);'''
+            sql = '''INSERT INTO user VALUES (%s,%s,%s);'''
 
             db.execute(sql,(id,password,nickname))
             db.commit()
-        except:
+            
+        except TypeError:
             return module.error_handler.errer_message("Bad Request")
+        return module.error_handler.success_message("OK")
 
-
-@bp.route('/login/', methods=('POST'))
+@bp.route('/login/', methods=['POST'])
 def login():
     if request.method == 'POST':
         id = request.form['id']
@@ -56,7 +57,7 @@ def login():
 
         return jsonify(user_info)
 
-@bp.route('/logout/', methods=('POST'))
+@bp.route('/logout/', methods=['POST'])
 def logout():
     try:
         session.clear()

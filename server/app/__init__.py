@@ -4,7 +4,8 @@ from flask_restx import Api, Resource
 from apis.image_similarity_visual import compare
 from apis.problem import problem
 
-import apis.auth
+# import apis.auth
+
 app = Flask(__name__)
 
 api = Api(
@@ -17,7 +18,8 @@ api = Api(
 api.add_namespace(compare, '/compare')      # 이미지 유사도 관련
 api.add_namespace(problem, '/problems')     # 문제 관련
 
-from ..apis import auth
+# from ..apis import auth
+from apis import auth
 app.register_blueprint(auth.bp)
 
 if __name__ == "__main__":
