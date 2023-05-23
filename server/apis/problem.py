@@ -9,13 +9,18 @@ from module.database import Database;
 import pymysql
 import datetime
 import module.error_handler
+import json
+import ast
 
 problem = Namespace(name='problems', description="문제 DB 관리")
 
 ## 테이블을 가져올 때 데이터 정리
 # 태그의 문자열을 파싱한다.
 def tag_parser(tags):
-    return tags.split(', ')
+    print(tags)
+    result = ast.literal_eval(tags)
+    print(result)
+    return result
 
 # 각 코드가 존재하는지에 대한 여부를 확인한다.
 def is_code(row, key, new_name):
@@ -46,7 +51,7 @@ class problem_list(Resource):
             `registration_date` date NOT NULL,
             `modification_date` date NOT NULL,
             `uploader` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-            `tags` varchar(500) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
+            `tags` varchar(200) DEFAULT NULL,
             `likeCount` int DEFAULT '0',
             `dislikeCount` int DEFAULT '0',
             `bookmarkCount` int DEFAULT '0',
@@ -78,6 +83,7 @@ class problem_list(Resource):
         
             # 2. 정보 가공하기 : 각 코드의 존재 여부, tag 문자열 나누기
             for row in rows:
+                print(row)
                 row['tags'] = tag_parser(row['tags'])
                 row = is_code(row, 'HTML_code', 'isHTML')
                 row = is_code(row, 'CSS_code', 'isCSS')
@@ -93,6 +99,7 @@ class problem_list(Resource):
         db = Database()
         # 1. JSON으로 정보 가져오기
         problem = request.get_json()
+        tags_string = json.dumps(problem['tags'])
         
         # 1-1. 로그인 로그아웃이 구현이 완료된다면 여기에 업로더 이름 넣기
         uploarder = "WinterHana"
@@ -106,7 +113,7 @@ class problem_list(Resource):
             '''
     
             val = (problem['title'], problem['description'], problem['html_code'], problem['css_code'], problem['js_code'], 
-                   datetime.date.today(), datetime.date.today(), uploarder, problem['tags'])
+                   datetime.date.today(), datetime.date.today(), uploarder, tags_string)
     
             db.execute_all(sql, val)
             db.commit()
@@ -137,7 +144,7 @@ class problem_id(Resource):
             result = db.execute_all(sql, val)
             db.commit()
             
-        except:
+        except pymysql.err.InterfaceError as e:
             return module.error_handler.errer_message("Bad Request")
         
         if not result:
@@ -145,31 +152,16 @@ class problem_id(Resource):
         else:
             return jsonify(result)
     
-    # def delete(self, problem_id):
-    #     """DELETE 문제 내용 삭제하기 : 문제 번호가 주어지면 그 번호의 문제를 삭제합니다."""
-    #     db = Database()
-    #     try:
-    #         sql = "DELETE FROM PROBLEM WHERE id = %s"
-    #         val = (problem_id)
+    def delete(self, problem_id):
+        """DELETE 문제 내용 삭제하기 : 문제 번호가 주어지면 그 번호의 문제를 삭제합니다."""
+        db = Database()
+        try:
+            sql = "DELETE FROM PROBLEM WHERE id = %s"
+            val = (problem_id)
         
-    #         db.execute_all(sql, val)
-    #         db.commit()
-    #     except pymysql.err.IntegrityError as e:
-    #         return "유효한 번호가 아닙니다."
+            db.execute_all(sql, val)
+            db.commit()
+        except pymysql.err.IntegrityError as e:
+            return module.error_handler.errer_message("Bad Request")
         
-    #     return "문제 삭제 완료!", 200
-
-
-# insert_fields = problem.model( 'insert', {
-#     'id' : fields.String(description='문제 번호, PK입니다.', required=True, example='0'),
-#     'title' : fields.String(description='문제 제목', required=True, example='테스트 문제'),
-#     'description' : fields.String(description='문제 제목', required=True, example='테스트 중입니다'),
-#     'HTML_code' : fields.String(description='HTML 코드입니다.', required=True, example='Hello, world!'),
-#     'CSS_code' : fields.String(description='CSS 코드입니다.', required=True, example='-'),
-#     'JS_code' : fields.String(description='JS 코드입니다.', required=True, example='-'),
-#     'uploader' : fields.String(description='문제를 업로드한 사람의 닉네임입니다.', required=True, example='WinterHana'),
-# })
-
-# delete_fields = problem.model('delete', {
-#     'id' : fields.String(description='문제 번호', required=True, example='0')
-# })
+        return module.error_handler.success_message("OK")
