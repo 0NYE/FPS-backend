@@ -9,13 +9,23 @@ from module.database import Database;
 import pymysql
 import datetime
 import module.error_handler
+import json
 
 problem = Namespace(name='problems', description="문제 DB 관리")
 
 ## 테이블을 가져올 때 데이터 정리
 # 태그의 문자열을 파싱한다.
 def tag_parser(tags):
-    return tags.split(', ')
+    str = tags
+    table = str.maketrans({
+    '[': '',
+    ']': '',
+    "'": '',
+    '"': '',
+    })
+    str = str.translate(table)
+    str = str.split(", ")
+    return str
 
 # 각 코드가 존재하는지에 대한 여부를 확인한다.
 def is_code(row, key, new_name):
@@ -46,7 +56,7 @@ class problem_list(Resource):
             `registration_date` date NOT NULL,
             `modification_date` date NOT NULL,
             `uploader` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-            `tags` varchar(500) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
+            `tags` json DEFAULT NULL,
             `likeCount` int DEFAULT '0',
             `dislikeCount` int DEFAULT '0',
             `bookmarkCount` int DEFAULT '0',
@@ -78,12 +88,13 @@ class problem_list(Resource):
         
             # 2. 정보 가공하기 : 각 코드의 존재 여부, tag 문자열 나누기
             for row in rows:
+                print(row['tags'])
                 row['tags'] = tag_parser(row['tags'])
                 row = is_code(row, 'HTML_code', 'isHTML')
                 row = is_code(row, 'CSS_code', 'isCSS')
                 row = is_code(row, 'JS_code', 'isJS')
                 
-        except:
+        except pymysql.err.IntegrityError as e:
             return module.error_handler.errer_message("Bad Request")
         
         return jsonify(rows)
@@ -129,7 +140,7 @@ class problem_id(Resource):
                 `PROBLEM`.`description`,
                 `PROBLEM`.`HTML_code`,
                 `PROBLEM`.`CSS_code`,
-                `PROBLEM`.`JS_code`
+                `PROBLEM`.`JS_code`,
                 FROM `fps`.`PROBLEM` where id = %s;
             '''
             val = (problem_id)
@@ -145,31 +156,16 @@ class problem_id(Resource):
         else:
             return jsonify(result)
     
-    # def delete(self, problem_id):
-    #     """DELETE 문제 내용 삭제하기 : 문제 번호가 주어지면 그 번호의 문제를 삭제합니다."""
-    #     db = Database()
-    #     try:
-    #         sql = "DELETE FROM PROBLEM WHERE id = %s"
-    #         val = (problem_id)
+    def delete(self, problem_id):
+        """DELETE 문제 내용 삭제하기 : 문제 번호가 주어지면 그 번호의 문제를 삭제합니다."""
+        db = Database()
+        try:
+            sql = "DELETE FROM PROBLEM WHERE id = %s"
+            val = (problem_id)
         
-    #         db.execute_all(sql, val)
-    #         db.commit()
-    #     except pymysql.err.IntegrityError as e:
-    #         return "유효한 번호가 아닙니다."
+            db.execute_all(sql, val)
+            db.commit()
+        except pymysql.err.IntegrityError as e:
+            return module.error_handler.errer_message("Bad Request")
         
-    #     return "문제 삭제 완료!", 200
-
-
-# insert_fields = problem.model( 'insert', {
-#     'id' : fields.String(description='문제 번호, PK입니다.', required=True, example='0'),
-#     'title' : fields.String(description='문제 제목', required=True, example='테스트 문제'),
-#     'description' : fields.String(description='문제 제목', required=True, example='테스트 중입니다'),
-#     'HTML_code' : fields.String(description='HTML 코드입니다.', required=True, example='Hello, world!'),
-#     'CSS_code' : fields.String(description='CSS 코드입니다.', required=True, example='-'),
-#     'JS_code' : fields.String(description='JS 코드입니다.', required=True, example='-'),
-#     'uploader' : fields.String(description='문제를 업로드한 사람의 닉네임입니다.', required=True, example='WinterHana'),
-# })
-
-# delete_fields = problem.model('delete', {
-#     'id' : fields.String(description='문제 번호', required=True, example='0')
-# })
+        return module.error_handler.success_message("OK")

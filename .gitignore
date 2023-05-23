@@ -15,6 +15,9 @@ migrations
 logs
 config
 
+# image ignore
+server.app.static.result.png
+
 # C extensions
 *.so
 

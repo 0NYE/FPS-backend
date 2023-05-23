@@ -7,7 +7,6 @@ from skimage.metrics import structural_similarity as ssim
 from flask import request, send_file, jsonify, url_for
 from flask_restx import Namespace, Resource
 from werkzeug.utils import secure_filename
-from module.database import Database;
 import module.error_handler
 
 import cv2
@@ -80,11 +79,3 @@ class compare_image(Resource):
             "image" : image_url,
             "score" : score
         })
-
-# async def html_to_image(html_code, css_code, output_image_path):
-#     browser = await launch()
-#     page = await browser.newPage()
-#     await page.setContent(html_code)
-#     await page.addStyleTag(content=css_code)
-#     await page.screenshot({'path': output_image_path})
-#     await browser.close()
