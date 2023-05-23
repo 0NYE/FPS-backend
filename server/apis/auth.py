@@ -48,7 +48,7 @@ def login():
 
         db = Database()
 
-        sql = '''SELECT * user WHERE id = %s and password = %s;'''
+        sql = '''SELECT * FROM user WHERE id = %s and password = %s;'''
 
         user_info = db.execute_one(sql, (id, password))
 
