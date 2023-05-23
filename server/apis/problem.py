@@ -10,22 +10,17 @@ import pymysql
 import datetime
 import module.error_handler
 import json
+import ast
 
 problem = Namespace(name='problems', description="문제 DB 관리")
 
 ## 테이블을 가져올 때 데이터 정리
 # 태그의 문자열을 파싱한다.
 def tag_parser(tags):
-    str = tags
-    table = str.maketrans({
-    '[': '',
-    ']': '',
-    "'": '',
-    '"': '',
-    })
-    str = str.translate(table)
-    str = str.split(", ")
-    return str
+    print(tags)
+    result = ast.literal_eval(tags)
+    print(result)
+    return result
 
 # 각 코드가 존재하는지에 대한 여부를 확인한다.
 def is_code(row, key, new_name):
@@ -56,7 +51,7 @@ class problem_list(Resource):
             `registration_date` date NOT NULL,
             `modification_date` date NOT NULL,
             `uploader` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL,
-            `tags` json DEFAULT NULL,
+            `tags` varchar(200) DEFAULT NULL,
             `likeCount` int DEFAULT '0',
             `dislikeCount` int DEFAULT '0',
             `bookmarkCount` int DEFAULT '0',
@@ -88,13 +83,13 @@ class problem_list(Resource):
         
             # 2. 정보 가공하기 : 각 코드의 존재 여부, tag 문자열 나누기
             for row in rows:
-                print(row['tags'])
+                print(row)
                 row['tags'] = tag_parser(row['tags'])
                 row = is_code(row, 'HTML_code', 'isHTML')
                 row = is_code(row, 'CSS_code', 'isCSS')
                 row = is_code(row, 'JS_code', 'isJS')
                 
-        except pymysql.err.IntegrityError as e:
+        except:
             return module.error_handler.errer_message("Bad Request")
         
         return jsonify(rows)
@@ -104,6 +99,7 @@ class problem_list(Resource):
         db = Database()
         # 1. JSON으로 정보 가져오기
         problem = request.get_json()
+        tags_string = json.dumps(problem['tags'])
         
         # 1-1. 로그인 로그아웃이 구현이 완료된다면 여기에 업로더 이름 넣기
         uploarder = "WinterHana"
@@ -117,7 +113,7 @@ class problem_list(Resource):
             '''
     
             val = (problem['title'], problem['description'], problem['html_code'], problem['css_code'], problem['js_code'], 
-                   datetime.date.today(), datetime.date.today(), uploarder, problem['tags'])
+                   datetime.date.today(), datetime.date.today(), uploarder, tags_string)
     
             db.execute_all(sql, val)
             db.commit()
@@ -140,7 +136,7 @@ class problem_id(Resource):
                 `PROBLEM`.`description`,
                 `PROBLEM`.`HTML_code`,
                 `PROBLEM`.`CSS_code`,
-                `PROBLEM`.`JS_code`,
+                `PROBLEM`.`JS_code`
                 FROM `fps`.`PROBLEM` where id = %s;
             '''
             val = (problem_id)
@@ -148,7 +144,7 @@ class problem_id(Resource):
             result = db.execute_all(sql, val)
             db.commit()
             
-        except:
+        except pymysql.err.InterfaceError as e:
             return module.error_handler.errer_message("Bad Request")
         
         if not result:
