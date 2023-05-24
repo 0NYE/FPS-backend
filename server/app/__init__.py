@@ -1,11 +1,11 @@
 from flask import Flask, jsonify
 from flask_restx import Api, Resource
+from flask_cors import CORS
 
 from apis.image_similarity_visual import compare
 from apis.problem import problem
 
 # import apis.auth
-
 app = Flask(__name__)
 
 api = Api(
@@ -21,6 +21,8 @@ api.add_namespace(problem, '/problems')     # 문제 관련
 # from ..apis import auth
 from apis import auth
 app.register_blueprint(auth.bp)
+
+CORS(app)
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)
