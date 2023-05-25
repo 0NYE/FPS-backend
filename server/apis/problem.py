@@ -134,6 +134,7 @@ class problem_id(Resource):
             sql = '''
                 SELECT `PROBLEM`.`id`,
                 `PROBLEM`.`description`,
+                `PROBLEM`.`title`,
                 `PROBLEM`.`HTML_code`,
                 `PROBLEM`.`CSS_code`,
                 `PROBLEM`.`JS_code`
