@@ -145,13 +145,15 @@ class problem_id(Resource):
             result = db.execute_all(sql, val)
             db.commit()
             
+            print(result[0])
+            
         except pymysql.err.InterfaceError as e:
             return module.error_handler.errer_message("Bad Request")
         
         if not result:
             return module.error_handler.errer_message("Bad Request")
         else:
-            return jsonify(result)
+            return jsonify(result[0])
     
     def delete(self, problem_id):
         """DELETE 문제 내용 삭제하기 : 문제 번호가 주어지면 그 번호의 문제를 삭제합니다."""
