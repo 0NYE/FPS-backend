@@ -198,7 +198,7 @@ class problem_submit(Resource):
             'submit' : user_image
         }
         
-        image_similarity = requests.post('http://localhost:5000/compare', files = files)
+        image_similarity = requests.post('http://3.39.151.177/compare', files = files)
         
         result = image_similarity.json()
     
