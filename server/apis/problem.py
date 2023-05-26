@@ -1,7 +1,7 @@
 # 문제 테이블 컨트롤 view입니다.
 # flask_restx Namespace를 이용해 Rest API를 구성했습니다.
 
-from flask import request, jsonify
+from flask import request, jsonify, session       # 추가
 from flask_restx import Resource, Namespace
 
 from module.database import Database;
@@ -11,7 +11,8 @@ import datetime
 import module.error_handler
 import json
 import ast
-
+import requests     # 추가
+ 
 problem = Namespace(name='problems', description="문제 DB 관리")
 
 ## 테이블을 가져올 때 데이터 정리
@@ -104,6 +105,7 @@ class problem_list(Resource):
         # 1-1. 로그인 로그아웃이 구현이 완료된다면 여기에 업로더 이름 넣기
         uploarder = "WinterHana"
         
+        
         # 2. 값 받아서 데이터베이스에 넣기
         try:
             sql = '''
@@ -128,6 +130,9 @@ class problem_id(Resource):
     def get(self, problem_id):
         """GET 문제 가져오기 : 문제 번호가 주어지면 그 문제 번호의 정보를 가져옵니다."""
         db = Database()
+        
+        # 0. 세션에 문제 번호 임시로 저장하기
+        session['problem_id'] = problem_id
         
         # 1. 필요한 정보 Select 후 전송하기
         try:
@@ -168,3 +173,77 @@ class problem_id(Resource):
             return module.error_handler.errer_message("Bad Request")
         
         return module.error_handler.success_message("OK")
+    
+
+@problem.route('/submit')
+class problem_submit(Resource):
+    def post(self):
+        """POST : 문제를 제출합니다."""
+        db = Database()
+        
+        # 1. 기본적인 정보 가져오기
+        problem_image = request.files['problem_image']
+        user_image = request.files['user_image']
+        html_code = request.form['html_code']
+        css_code = request.form['css_code']
+        js_code = request.form['css_code']
+        problem_id = session.get('problem_id')          # 세션에 저장된 problem_id
+        user_id = "WinterHana"                          # 로그인 완전히 구현될 때까지 이 이름으로 고정
+        submission_date = datetime.date.today()
+        
+        
+        # 2. 이미지 유사도 결과를 가져오고 성공과 실패 여부를 확인한다.
+        files = {
+            'problem' : problem_image,
+            'submit' : user_image
+        }
+        
+        image_similarity = requests.post('http://localhost:5000/compare', files = files)
+        
+        result = image_similarity.json()
+    
+        print(result)
+    
+        score = result['score']
+        
+        if(score > 0.98): success = True
+        else: success = False
+        
+        # 3. 실패 이유를 서술한다.
+        fail_reason = '미정'
+        
+        # 4. lighthouse_report에 코드를 전달해서 결과값을 가져온다.
+        lighthouse_report = '미정'
+        
+        # 5. DB에 저장하기
+        sql = '''
+            INSERT INTO `fps`.`SUBMIT`
+            (`problem_id`,`user_id`,`HTML_code`,`CSS_code`,`JS_code`,`submission_date`,`success`,`fail_reason`,`lighthouse_report`)
+            VALUES
+            (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+        '''
+        
+        val = (int(problem_id), user_id, html_code, css_code, js_code, 
+                   submission_date, success, fail_reason, lighthouse_report)
+        
+        db.execute_all(sql, val)
+        db.commit()
+        
+        return "ok"
+    
+@problem.route('/submit/<int:problem_id>')
+class problem_submit_id(Resource):
+    def get(self, problem_id):
+        """GET : 주어진 번호의 문제에 대한 제출 내용을 가져옵니다.."""
+        db = Database()
+        
+        sql = '''
+            SELECT * FROM SUBMIT where problem_id = %s;
+        '''
+        val = (problem_id)
+        
+        result = db.execute_all(sql, val)
+        db.commit()
+
+        return jsonify(result)
+    
