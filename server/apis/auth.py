@@ -4,7 +4,6 @@ from werkzeug.utils import redirect
 
 import functools
 
-
 from module.database import Database;
 import module.error_handler
 
@@ -52,7 +51,7 @@ def login():
         sql = '''SELECT * FROM user WHERE id = %s and password = %s;'''
 
         user_info = db.execute_one(sql, (id, password))
-
+        
         # [('아이디1','비번1','닉네임1')]
         # 아이디, 비밀번호 일치 시 세션에 저장
         if (id == user_info['id']) and (password == user_info['password']):
