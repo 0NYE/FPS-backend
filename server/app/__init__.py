@@ -7,6 +7,7 @@ from apis.problem import problem
 
 # import apis.auth
 app = Flask(__name__)
+app.secret_key = 'test'
 
 api = Api(
     app,
