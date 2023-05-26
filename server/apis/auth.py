@@ -53,6 +53,12 @@ def login():
 
         user_info = db.execute_one(sql, (id, password))
 
+        # [('아이디1','비번1','닉네임1')]
+        # 아이디, 비밀번호 일치 시 세션에 저장
+        if (id == user_info[0][0]) and (password == user_info[0][1]):
+            session['id'] = id
+        else:
+            return "에러"
         db.commit()
 
         return jsonify(user_info)
