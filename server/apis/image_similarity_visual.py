@@ -26,16 +26,21 @@ class compare_image(Resource):
             # 두 이미지를 받음
             problem = request.files['problem']
             submit = request.files['submit']
-        
             ## 이미지 유사도 비교 후 비교 결과 가져오기
             # 본 코드
             img_path = os.getcwd() + "/app/static"
-        
+
             print(img_path)
-        
+
             problem = cv2.imdecode(np.frombuffer(problem.read(), np.uint8), cv2.IMREAD_COLOR)
             submit = cv2.imdecode(np.frombuffer(submit.read(), np.uint8), cv2.IMREAD_COLOR)
-        
+            
+            pw, ph, pc = problem.shape
+            sw, sh, sc = submit.shape
+            
+            if(ph != sh or pw != sw): return module.error_handler.errer_message_opencv("크기 오류", ph, pw, sh, sw)
+            
+            
             # grayscale로 변경
             grayA = cv2.cvtColor(problem, cv2.COLOR_BGR2GRAY)
             grayB = cv2.cvtColor(submit, cv2.COLOR_BGR2GRAY)

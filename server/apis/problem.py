@@ -223,7 +223,7 @@ class problem_submit(Resource):
             (%s, %s, %s, %s, %s, %s, %s, %s, %s);
         '''
         
-        val = (int(problem_id), user_id, html_code, css_code, js_code, 
+        val = (problem_id, user_id, html_code, css_code, js_code, 
                    submission_date, success, fail_reason, lighthouse_report)
         
         db.execute_all(sql, val)
