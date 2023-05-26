@@ -55,10 +55,10 @@ def login():
 
         # [('아이디1','비번1','닉네임1')]
         # 아이디, 비밀번호 일치 시 세션에 저장
-        if (id == user_info[0][0]) and (password == user_info[0][1]):
+        if (id == user_info['id']) and (password == user_info['password']):
             session['id'] = id
         else:
-            return "에러"
+            return "아이디나 비밀번호가 틀렸습니다.", 400
         db.commit()
 
         return jsonify(user_info)
