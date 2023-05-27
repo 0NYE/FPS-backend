@@ -197,7 +197,7 @@ class problem_submit(Resource):
             'problem' : problem_image,
             'submit' : user_image
         }
-        server_url = 'http://3.39.151.177/compare'
+        server_url = 'http://13.125.148.109//compare'
         image_similarity = requests.post(server_url, files = files)
         result = image_similarity.json()
         print(result)
@@ -216,14 +216,16 @@ class problem_submit(Resource):
         fail_reason = '미정'
         
         # 4. lighthouse_report에 코드를 전달해서 결과값을 가져온다.
-        lighthouse_url = 'http://13.125.53.51:3000/api/judge'
-        data = {
-            'html' : html_code,
-            'css' : css_code,
-            'js' : js_code
-        }
-        lighthouse_report = requests.post(lighthouse_url, data = data)
-        # print(lighthouse_report.text)
+        # lighthouse_url = 'http://13.125.53.51:3000/api/judge'
+        # data = {
+        #     'html' : html_code,
+        #     'css' : css_code,
+        #     'js' : js_code
+        # }
+        # lighthouse_report = requests.post(lighthouse_url, data = data)
+        # # print(lighthouse_report.text)
+        
+        lighthouse_report = "미정"
         
         # 4-1 디버깅
         # return lighthouse_report.text
@@ -237,7 +239,7 @@ class problem_submit(Resource):
         '''
         
         val = (problem_id, user_id, html_code, css_code, js_code, 
-                   submission_date, success, fail_reason, lighthouse_report.text)
+                   submission_date, success, fail_reason, lighthouse_report)
         
         db.execute_all(sql, val)
         db.commit()
