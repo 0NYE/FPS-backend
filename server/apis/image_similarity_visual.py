@@ -30,7 +30,7 @@ class compare_image(Resource):
             # 본 코드
             img_path = os.getcwd() + "/app/static"
 
-            print(img_path)
+            # print(img_path)
 
             problem = cv2.imdecode(np.frombuffer(problem.read(), np.uint8), cv2.IMREAD_COLOR)
             submit = cv2.imdecode(np.frombuffer(submit.read(), np.uint8), cv2.IMREAD_COLOR)
@@ -39,7 +39,6 @@ class compare_image(Resource):
             sw, sh, sc = submit.shape
             
             if(ph != sh or pw != sw): return module.error_handler.errer_message_opencv("크기 오류", ph, pw, sh, sw)
-            
             
             # grayscale로 변경
             grayA = cv2.cvtColor(problem, cv2.COLOR_BGR2GRAY)
@@ -50,7 +49,7 @@ class compare_image(Resource):
             diff = (diff * 255).astype("uint8")
 
             # print only the score if you want
-            print("SSIM: {}".format(score))
+            # print("SSIM: {}".format(score))
 
             # 이진화
             thresh = cv2.threshold(diff, 100, 255, cv2.THRESH_BINARY_INV)[1]

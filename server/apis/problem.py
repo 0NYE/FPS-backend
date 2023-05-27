@@ -186,7 +186,7 @@ class problem_submit(Resource):
         user_image = request.files['user_image']
         html_code = request.form['html_code']
         css_code = request.form['css_code']
-        js_code = request.form['css_code']
+        js_code = request.form['js_code']
         problem_id = session.get('problem_id')          # 세션에 저장된 problem_id
         user_id = "WinterHana"                          # 로그인 완전히 구현될 때까지 이 이름으로 고정
         submission_date = datetime.date.today()
@@ -197,15 +197,18 @@ class problem_submit(Resource):
             'problem' : problem_image,
             'submit' : user_image
         }
-        
-        image_similarity = requests.post('http://3.39.151.177/compare', files = files)
-        
+        server_url = 'http://3.39.151.177/compare'
+        image_similarity = requests.post(server_url, files = files)
         result = image_similarity.json()
-    
         print(result)
-    
-        score = result['score']
         
+        # 2-1. 오류가 났을 때를 대비해서 예외처리
+        if 'score' in result:
+            score = result['score']
+        else:
+            return result
+        
+        # 이미지 유사도 성공 / 실패 판단하기
         if(score > 0.98): success = True
         else: success = False
         
@@ -213,7 +216,17 @@ class problem_submit(Resource):
         fail_reason = '미정'
         
         # 4. lighthouse_report에 코드를 전달해서 결과값을 가져온다.
-        lighthouse_report = '미정'
+        lighthouse_url = 'http://13.125.53.51:3000/api/judge'
+        data = {
+            'html' : html_code,
+            'css' : css_code,
+            'js' : js_code
+        }
+        lighthouse_report = requests.post(lighthouse_url, data = data)
+        # print(lighthouse_report.text)
+        
+        # 4-1 디버깅
+        # return lighthouse_report.text
         
         # 5. DB에 저장하기
         sql = '''
@@ -224,12 +237,12 @@ class problem_submit(Resource):
         '''
         
         val = (problem_id, user_id, html_code, css_code, js_code, 
-                   submission_date, success, fail_reason, lighthouse_report)
+                   submission_date, success, fail_reason, lighthouse_report.text)
         
         db.execute_all(sql, val)
         db.commit()
         
-        return "ok"
+        return module.error_handler.success_message("OK")
     
 @problem.route('/submit/<int:problem_id>')
 class problem_submit_id(Resource):
