@@ -150,7 +150,7 @@ class problem_id(Resource):
             result = db.execute_all(sql, val)
             db.commit()
             
-            print(result[0])
+            # print(result[0])
             
         except pymysql.err.InterfaceError as e:
             return module.error_handler.errer_message("Bad Request")
@@ -191,7 +191,6 @@ class problem_submit(Resource):
         user_id = "WinterHana"                          # 로그인 완전히 구현될 때까지 이 이름으로 고정
         submission_date = datetime.date.today()
         
-        
         # 2. 이미지 유사도 결과를 가져오고 성공과 실패 여부를 확인한다.
         files = {
             'problem' : problem_image,
@@ -216,19 +215,20 @@ class problem_submit(Resource):
         fail_reason = '미정'
         
         # 4. lighthouse_report에 코드를 전달해서 결과값을 가져온다.
-        # lighthouse_url = 'http://13.125.53.51:3000/api/judge'
-        # data = {
-        #     'html' : html_code,
-        #     'css' : css_code,
-        #     'js' : js_code
-        # }
-        # lighthouse_report = requests.post(lighthouse_url, data = data)
-        # # print(lighthouse_report.text)
+        try:
+            
+            lighthouse_url = 'http://15.164.150.247:3000/api/judge'
+            data = {
+                'html' : html_code,
+                'css' : css_code,
+                'js' : js_code
+            }
+            lighthouse_report = requests.post(lighthouse_url, data = data)
+        except requests.exceptions.ConnectionError as e:
+            # 4 - 1서버가 연결되지 않으면 예외처리
+            return module.error_handler.errer_message("Lighthouse 서버가 OFF된 상태입니다.") 
         
-        lighthouse_report = "미정"
-        
-        # 4-1 디버깅
-        # return lighthouse_report.text
+        lighthouse_report = lighthouse_report.text
         
         # 5. DB에 저장하기
         sql = '''
