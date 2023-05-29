@@ -187,8 +187,8 @@ class problem_submit(Resource):
         html_code = request.form['html_code']
         css_code = request.form['css_code']
         js_code = request.form['js_code']
-        problem_id = session.get('problem_id')          # 세션에 저장된 problem_id
-        user_id = "WinterHana"                          # 로그인 완전히 구현될 때까지 이 이름으로 고정
+        problem_id = session.get('problem_id')              # 세션에 저장된 problem_id
+        user_id = session['id']                             # 로그인 완전히 구현될 때까지 이 이름으로 고정
         submission_date = datetime.date.today()
         
         # 2. 이미지 유사도 결과를 가져오고 성공과 실패 여부를 확인한다.
@@ -208,11 +208,15 @@ class problem_submit(Resource):
             return result
         
         # 이미지 유사도 성공 / 실패 판단하기
-        if(score > 0.98): success = True
-        else: success = False
+        if(score > 0.98): 
+            success = True
+            fail_reason = '없음'
+        else: 
+            success = False
+            fail_reason = '이미지 유사도'
         
         # 3. 실패 이유를 서술한다.
-        fail_reason = '미정'
+        
         
         # 4. lighthouse_report에 코드를 전달해서 결과값을 가져온다.
         try:

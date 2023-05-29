@@ -9,7 +9,7 @@ import module.error_handler
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-@bp.route('/signup/', methods=['POST'])
+@bp.route('/signup', methods=['POST'])
 def signup():
     if request.method == 'POST':
         id = request.form['id']
@@ -40,7 +40,7 @@ def signup():
             return module.error_handler.errer_message("Bad Request")
         return module.error_handler.success_message("OK")
 
-@bp.route('/login/', methods=['POST'])
+@bp.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
         id = request.form['id']
@@ -62,7 +62,7 @@ def login():
 
         return jsonify(user_info)
 
-@bp.route('/logout/', methods=['POST'])
+@bp.route('/logout', methods=['POST'])
 def logout():
     try:
         session.clear()
