@@ -7,14 +7,18 @@ from skimage.metrics import structural_similarity as ssim
 from flask import request, send_file, jsonify, url_for
 from flask_restx import Namespace, Resource
 from werkzeug.utils import secure_filename
-import module.error_handler
 
+import module.error_handler
+import math
 import cv2
 import numpy as np
 import os
 
+def score_remix(_score):
+    return math.pow(_score, 4)
+
 compare = Namespace(name='compare', description="이미지 비교")
-     
+
 @compare.route('')
 class compare_image(Resource):
     def post(self):
@@ -47,12 +51,15 @@ class compare_image(Resource):
             # Compute the Structural Similarity Index (SSIM) between the two images, ensuring that the difference image is returned
             (score, diff) = ssim(grayA, grayB, full=True)
             diff = (diff * 255).astype("uint8")
-
+            
             # print only the score if you want
-            # print("SSIM: {}".format(score))
+            print("SSIM: {}".format(score))
+            
+            # 점수를 다시 정규화, result를 최종적으로 전송한다.
+            result = score_remix(score)
 
             # 이진화
-            thresh = cv2.threshold(diff, 100, 255, cv2.THRESH_BINARY_INV)[1]
+            thresh = cv2.threshold(diff, 0, 200, cv2.THRESH_BINARY_INV|cv2.THRESH_OTSU)[1]
 
             # get contours : 윤곽 잡기 -> 검은색 바탕에서 하얀색 물체 찾기
             cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -61,7 +68,7 @@ class compare_image(Resource):
             # 사각형 그리기
             for c in cnts:
                 area = cv2.contourArea(c)                           # contour의 영역 계산
-                if area > 50:                                       # count 값이 작으면 무시, 크면 박스 생성
+                if area > 40:                                       # count 값이 작으면 무시, 크면 박스 생성
                     x, y, w, h = cv2.boundingRect(c)
                     cv2.rectangle(problem, (x, y), (x + w, y + h), (255, 0, 255), 2)
                     cv2.rectangle(submit, (x, y), (x + w, y + h), (255, 0, 255), 2)
@@ -76,5 +83,5 @@ class compare_image(Resource):
             
         return jsonify({
             "image" : image_url,
-            "score" : score
+            "score" : result
         })
