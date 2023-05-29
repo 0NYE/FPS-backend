@@ -9,6 +9,12 @@ from apis.problem import problem
 app = Flask(__name__)
 app.secret_key = 'test'
 
+# from ..apis import auth
+from apis import auth
+app.register_blueprint(auth.bp)
+
+CORS(app)
+
 api = Api(
     app,
     version='0.2',
@@ -18,12 +24,6 @@ api = Api(
 
 api.add_namespace(compare, '/compare')      # 이미지 유사도 관련
 api.add_namespace(problem, '/problems')     # 문제 관련
-
-# from ..apis import auth
-from apis import auth
-app.register_blueprint(auth.bp)
-
-CORS(app)
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)
