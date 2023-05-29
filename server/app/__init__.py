@@ -3,6 +3,8 @@ from flask_restx import Api, Resource
 from flask_cors import CORS
 
 from apis.image_similarity_visual import compare
+# from apis.problem_image import problem
+# from apis.problem_lighthouse import problem
 from apis.problem import problem
 
 # import apis.auth

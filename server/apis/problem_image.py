@@ -187,28 +187,27 @@ class problem_submit(Resource):
         html_code = request.form['html_code']
         css_code = request.form['css_code']
         js_code = request.form['js_code']
-        problem_id = 10 #session.get('problem_id')              # 세션에 저장된 problem_id
-        user_id = "test" #session['id']                             # 로그인 완전히 구현될 때까지 이 이름으로 고정
+        problem_id = session.get('problem_id')              # 세션에 저장된 problem_id
+        user_id = session['id']                             # 로그인 완전히 구현될 때까지 이 이름으로 고정
         submission_date = datetime.date.today()
         
-        print(problem_id)
-        print(user_id)
-        # 2. 이미지 유사도 결과를 가져오고 성공과 실패 여부를 확인한다.
-        files = {
-            'problem' : problem_image,
-            'submit' : user_image
-        }
-        server_url = 'http://13.125.148.109//compare'
-        image_similarity = requests.post(server_url, files = files)
-        result = image_similarity.json()
-        print(result)
+        # # 2. 이미지 유사도 결과를 가져오고 성공과 실패 여부를 확인한다.
+        # files = {
+        #     'problem' : problem_image,
+        #     'submit' : user_image
+        # }
+        # server_url = 'http://13.125.148.109//compare'
+        # image_similarity = requests.post(server_url, files = files)
+        # result = image_similarity.json()
+        # print(result)
         
-        # 2-1. 오류가 났을 때를 대비해서 예외처리
-        if 'score' in result:
-            score = result['score']
-        else:
-            return result
-        
+        # # 2-1. 오류가 났을 때를 대비해서 예외처리
+        # if 'score' in result:
+        #     score = result['score']
+        # else:
+        #     return result
+        score = 0
+         
         # 이미지 유사도 성공 / 실패 판단하기
         if(score > 0.98): 
             success = True
@@ -216,6 +215,9 @@ class problem_submit(Resource):
         else: 
             success = False
             fail_reason = '이미지 유사도'
+        
+        # 3. 실패 이유를 서술한다.
+        
         
         # 4. lighthouse_report에 코드를 전달해서 결과값을 가져온다.
         try:
