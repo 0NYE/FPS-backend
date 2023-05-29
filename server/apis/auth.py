@@ -12,12 +12,13 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 @bp.route('/signup', methods=['POST'])
 def signup():
     if request.method == 'POST':
-        id = request.form['id']
-        password = request.form['password']
-        nickname = request.form['nickname']
-
         db = Database()
 
+        user = request.get_json()
+        id = user['id']
+        password = user['password']
+        nickname = user['nickname']
+        
         try:
             # user 테이블 생성
             sql='''
@@ -43,10 +44,11 @@ def signup():
 @bp.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
-        id = request.form['id']
-        password = request.form['password']
-
         db = Database()
+        
+        user = request.get_json()
+        id = user['id']
+        password = user['password']
 
         sql = '''SELECT * FROM user WHERE id = %s and password = %s;'''
 
