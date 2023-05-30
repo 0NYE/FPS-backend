@@ -187,7 +187,7 @@ class problem_submit(Resource):
         html_code = request.form['html_code']
         css_code = request.form['css_code']
         js_code = request.form['js_code']
-        problem_id = 10 #session.get('problem_id')              # 세션에 저장된 problem_id
+        problem_id = 10 #session.get('problem_id')                  # 세션에 저장된 problem_id
         user_id = "test" #session['id']                             # 로그인 완전히 구현될 때까지 이 이름으로 고정
         submission_date = datetime.date.today()
         
