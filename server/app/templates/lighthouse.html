@@ -1,5 +1,15 @@
+<!DOCTYPE html>
 <html>
-    <body>${html}</body>
-    <style>${css}</style>
-    <script>${js}</script>
+<head>
+    <title>Lighthouse Report</title>
+    <style>
+        {{ css|safe }}
+    </style>
+</head>
+<body>
+    {{ html|safe }}
+    <script>
+        {{ js|safe }}
+    </script>
+</body>
 </html>

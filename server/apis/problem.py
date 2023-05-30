@@ -1,10 +1,11 @@
 # 문제 테이블 컨트롤 view입니다.
 # flask_restx Namespace를 이용해 Rest API를 구성했습니다.
 
-from flask import request, jsonify, session, url_for
+from flask import request, jsonify, session, url_for, render_template
 from flask_restx import Resource, Namespace
 
 from module.database import Database;
+from datetime import datetime
 
 import pymysql
 import datetime
@@ -13,6 +14,7 @@ import json
 import ast
 import requests
 import os
+import time
 
 problem = Namespace(name='problems', description="문제 DB 관리")
 
@@ -223,12 +225,15 @@ class problem_submit(Resource):
         try:
             
             lighthouse_url = 'http://15.164.150.247:3000/api/judge'
-            data = {
-                'html' : html_code,
-                'css' : css_code,
-                'js' : js_code
-            }
-            lighthouse_report = requests.post(lighthouse_url, data = data)
+            # data = {
+            #     'html': ('html_code.html', html_code, 'text/html'),
+            #     'css': ('css_code.css', css_code, 'text/css'),
+            #     'js': ('js_code.js', js_code, 'application/javascript')
+            # }
+            file = render_template('lighthouse.html' , html = html_code, css = css_code, js = js_code)
+            print(file)
+            lighthouse_report = requests.post(lighthouse_url, data = file)
+            
         except requests.exceptions.ConnectionError as e:
             # 4 - 1서버가 연결되지 않으면 예외처리
             return module.error_handler.errer_message("Lighthouse 서버가 OFF된 상태입니다.") 
@@ -236,10 +241,13 @@ class problem_submit(Resource):
         # 4 - 2 lighthouse_report를 .html 파일로 변환하기
         lighthouse_report = lighthouse_report.json()
         # print(lighthouse_report)
-        with open(os.getcwd() + "/app/static/report.html", "w", encoding="utf-8") as file:
+        
+        # 이름은 날짜 순으로 정렬
+        time_string = time.strftime('%Y%m%d-%H%M%S')
+        with open(os.getcwd() + "\\app\\static\\" + time_string + "report.html", "w", encoding="utf-8") as file:
             file.write(lighthouse_report['html'])
 
-        report_url = url_for('static', filename = 'report.html', _external=True)
+        report_url = url_for('static', filename = time_string + 'report.html', _external=True)
         
         # 5. DB에 저장하기
         sql = '''
