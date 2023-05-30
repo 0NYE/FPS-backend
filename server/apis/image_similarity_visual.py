@@ -81,7 +81,8 @@ class compare_image(Resource):
                 (score_change, diff_change) = ssim(grayA, grayC, full=True)
                 diff_change = (diff_change * 255).astype("uint8")
                 
-                score = score_origin * 0.9 + score_change * 0.1           # 두 값의 평균값을 구한다.
+                if(score_origin == 1): score = 1.0                            # 완전 같은 모양일 경우 1를 반환
+                else: score = score_origin * 0.9 + score_change * 0.1           # 두 값의 평균값을 구한다.
             
             # 평범한 경우에는 여기를 쓴다.
             else:       
