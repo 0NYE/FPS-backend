@@ -46,6 +46,7 @@ def login():
     if request.method == 'POST':
         db = Database()
         
+        profile_image_url = url_for('static', filename = 'profile_image.png', _external=True)
         user = request.get_json()
         id = user['id']
         password = user['password']
@@ -57,12 +58,15 @@ def login():
         # [('아이디1','비번1','닉네임1')]
         # 아이디, 비밀번호 일치 시 세션에 저장
         if (id == user_info['id']) and (password == user_info['password']):
-            session['id'] = id
+            True #session['id'] = id
         else:
             return "아이디나 비밀번호가 틀렸습니다.", 400
         db.commit()
-
-        return jsonify(user_info)
+        
+        return jsonify({
+                "nickname" : user_info['nickname'],
+                "profile_image" : profile_image_url
+        })
 
 @bp.route('/logout', methods=['POST'])
 def logout():

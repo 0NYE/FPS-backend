@@ -1,7 +1,7 @@
 # 문제 테이블 컨트롤 view입니다.
 # flask_restx Namespace를 이용해 Rest API를 구성했습니다.
 
-from flask import request, jsonify, session       # 추가
+from flask import request, jsonify, session, url_for
 from flask_restx import Resource, Namespace
 
 from module.database import Database;
@@ -11,8 +11,9 @@ import datetime
 import module.error_handler
 import json
 import ast
-import requests     # 추가
- 
+import requests
+import os
+
 problem = Namespace(name='problems', description="문제 DB 관리")
 
 ## 테이블을 가져올 때 데이터 정리
@@ -187,12 +188,10 @@ class problem_submit(Resource):
         html_code = request.form['html_code']
         css_code = request.form['css_code']
         js_code = request.form['js_code']
-        problem_id = 10 #session.get('problem_id')                  # 세션에 저장된 problem_id
-        user_id = "test" #session['id']                             # 로그인 완전히 구현될 때까지 이 이름으로 고정
+        problem_id = 1         # 임시 번호             # session.get('problem_id')      # 세션에 저장된 problem_id
+        user_id = "WinterHana"        # 임시 ID               # session['id']     # 로그인 완전히 구현될 때까지 이 이름으로 고정
         submission_date = datetime.date.today()
-        
-        print(problem_id)
-        print(user_id)
+    
         # 2. 이미지 유사도 결과를 가져오고 성공과 실패 여부를 확인한다.
         files = {
             'problem' : problem_image,
@@ -234,18 +233,24 @@ class problem_submit(Resource):
             # 4 - 1서버가 연결되지 않으면 예외처리
             return module.error_handler.errer_message("Lighthouse 서버가 OFF된 상태입니다.") 
         
+        # 4 - 2 lighthouse_report를 .html 파일로 변환하기
         lighthouse_report = lighthouse_report.text
+        with open(os.getcwd() + "/app/static/report.html", "w", encoding="utf-8") as file:
+            file.write(lighthouse_report)
+
+        report_url = url_for('static', filename = 'report.html', _external=True)
         
         # 5. DB에 저장하기
         sql = '''
             INSERT INTO `fps`.`SUBMIT`
-            (`problem_id`,`user_id`,`HTML_code`,`CSS_code`,`JS_code`,`submission_date`,`success`,`fail_reason`,`lighthouse_report`, `image_url`)
+            (`problem_id`,`user_id`,`HTML_code`,`CSS_code`,`JS_code`,`submission_date`,
+            `success`,`fail_reason`,`lighthouse_report`,`dff_image_url`,`similarity`,`report_url`)
             VALUES
-            (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+            (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         '''
         
-        val = (problem_id, user_id, html_code, css_code, js_code, 
-                   submission_date, success, fail_reason, lighthouse_report, image_url)
+        val = (problem_id, user_id, html_code, css_code, js_code, submission_date, 
+               success, fail_reason, lighthouse_report, image_url, score, report_url)
         
         db.execute_all(sql, val)
         db.commit()
