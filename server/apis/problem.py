@@ -188,7 +188,7 @@ class problem_submit(Resource):
         html_code = request.form['html_code']
         css_code = request.form['css_code']
         js_code = request.form['js_code']
-        problem_id = 1         # 임시 번호             # session.get('problem_id')      # 세션에 저장된 problem_id
+        problem_id = 1                # 임시 번호             # session.get('problem_id')      # 세션에 저장된 problem_id
         user_id = "WinterHana"        # 임시 ID               # session['id']     # 로그인 완전히 구현될 때까지 이 이름으로 고정
         submission_date = datetime.date.today()
     
@@ -234,9 +234,10 @@ class problem_submit(Resource):
             return module.error_handler.errer_message("Lighthouse 서버가 OFF된 상태입니다.") 
         
         # 4 - 2 lighthouse_report를 .html 파일로 변환하기
-        lighthouse_report = lighthouse_report.text
+        lighthouse_report = lighthouse_report.json()
+        # print(lighthouse_report)
         with open(os.getcwd() + "/app/static/report.html", "w", encoding="utf-8") as file:
-            file.write(lighthouse_report)
+            file.write(lighthouse_report['html'])
 
         report_url = url_for('static', filename = 'report.html', _external=True)
         
@@ -244,13 +245,13 @@ class problem_submit(Resource):
         sql = '''
             INSERT INTO `fps`.`SUBMIT`
             (`problem_id`,`user_id`,`HTML_code`,`CSS_code`,`JS_code`,`submission_date`,
-            `success`,`fail_reason`,`lighthouse_report`,`dff_image_url`,`similarity`,`report_url`)
+            `success`,`fail_reason`,`lighthouse_report`,`diff_image_url`,`similarity`,`report_url`)
             VALUES
             (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         '''
         
         val = (problem_id, user_id, html_code, css_code, js_code, submission_date, 
-               success, fail_reason, lighthouse_report, image_url, score, report_url)
+               success, fail_reason, lighthouse_report['report'], image_url, score, report_url)
         
         db.execute_all(sql, val)
         db.commit()
