@@ -244,7 +244,7 @@ class problem_submit(Resource):
         
         # 이름은 날짜 순으로 정렬
         time_string = time.strftime('%Y%m%d-%H%M%S')
-        with open(os.getcwd() + "\\app\\static\\" + time_string + "report.html", "w", encoding="utf-8") as file:
+        with open(os.getcwd() + "/app/static/" + time_string + "report.html", "w", encoding="utf-8") as file:
             file.write(lighthouse_report['html'])
 
         report_url = url_for('static', filename = time_string + 'report.html', _external=True)
