@@ -201,7 +201,10 @@ class problem_submit(Resource):
         server_url = 'http://13.125.148.109//compare'
         image_similarity = requests.post(server_url, files = files)
         result = image_similarity.json()
+        image_url = result['image']
         print(result)
+        
+        ## 230530 : url db에 추가해서 더해주기!
         
         # 2-1. 오류가 났을 때를 대비해서 예외처리
         if 'score' in result:
@@ -236,13 +239,13 @@ class problem_submit(Resource):
         # 5. DB에 저장하기
         sql = '''
             INSERT INTO `fps`.`SUBMIT`
-            (`problem_id`,`user_id`,`HTML_code`,`CSS_code`,`JS_code`,`submission_date`,`success`,`fail_reason`,`lighthouse_report`)
+            (`problem_id`,`user_id`,`HTML_code`,`CSS_code`,`JS_code`,`submission_date`,`success`,`fail_reason`,`lighthouse_report`, `image_url`)
             VALUES
-            (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+            (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         '''
         
         val = (problem_id, user_id, html_code, css_code, js_code, 
-                   submission_date, success, fail_reason, lighthouse_report)
+                   submission_date, success, fail_reason, lighthouse_report, image_url)
         
         db.execute_all(sql, val)
         db.commit()
@@ -261,6 +264,7 @@ class problem_submit_id(Resource):
         val = (problem_id)
         
         result = db.execute_all(sql, val)
+        
         db.commit()
 
         return jsonify(result)

@@ -16,7 +16,7 @@ import numpy as np
 import os
 
 def score_remix(_score):
-    return math.pow(_score, 4)
+    return math.pow(_score, 10)
 
 def replace_color(image, lower_color, upper_color):
     replacement_color = (0, 0, 0)  # 검정색

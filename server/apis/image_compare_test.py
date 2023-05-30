@@ -39,7 +39,7 @@ def replace_color(image, lower_color, upper_color):
     
     mask = cv2.inRange(change_image, lower_color, upper_color)
 
-    change_image[mask > 10] = replacement_color
+    change_image[mask > 0] = replacement_color
     cv2.imshow('mask', mask)
     cv2.imshow('change_image', change_image)
     cv2.waitKey()
