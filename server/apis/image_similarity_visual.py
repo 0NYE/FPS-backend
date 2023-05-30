@@ -14,6 +14,7 @@ import math
 import cv2
 import numpy as np
 import os
+import time
 
 def score_remix(_score):
     return math.pow(_score, 10)
@@ -114,11 +115,12 @@ class compare_image(Resource):
                     x, y, w, h = cv2.boundingRect(c)
                     cv2.rectangle(problem, (x, y), (x + w, y + h), (255, 0, 255), 2)
                     cv2.rectangle(submit, (x, y), (x + w, y + h), (255, 0, 255), 2)
-        
-            cv2.imwrite(img_path + '/result.png', problem)
+                    
+            times = time.strftime('%Y%m%d-%H%M%S')
+            cv2.imwrite(img_path + '/' + times + 'result.png', problem)
     
             # 이미지 url 생성
-            image_url = url_for('static', filename = 'result.png', _external=True)
+            image_url = url_for('static', filename = times + 'result.png', _external=True)
             
         except:
             module.error_handler.errer_message("Bad Request")

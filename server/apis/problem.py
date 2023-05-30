@@ -108,6 +108,7 @@ class problem_list(Resource):
         # 1-1. 로그인 로그아웃이 구현이 완료된다면 여기에 업로더 이름 넣기
         uploarder = "WinterHana"
         
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         # 2. 값 받아서 데이터베이스에 넣기
         try:
@@ -118,7 +119,7 @@ class problem_list(Resource):
             '''
     
             val = (problem['title'], problem['description'], problem['html_code'], problem['css_code'], problem['js_code'], 
-                   datetime.date.today(), datetime.date.today(), uploarder, tags_string)
+                   current_time, current_time, uploarder, tags_string)
     
             db.execute_all(sql, val)
             db.commit()
@@ -192,7 +193,8 @@ class problem_submit(Resource):
         js_code = request.form['js_code']
         problem_id = 1                # 임시 번호             # session.get('problem_id')      # 세션에 저장된 problem_id
         user_id = "WinterHana"        # 임시 ID               # session['id']     # 로그인 완전히 구현될 때까지 이 이름으로 고정
-        submission_date = datetime.date.today()
+        submission_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
     
         # 2. 이미지 유사도 결과를 가져오고 성공과 실패 여부를 확인한다.
         files = {
