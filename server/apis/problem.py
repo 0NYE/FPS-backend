@@ -108,7 +108,7 @@ class problem_list(Resource):
         # 1-1. 로그인 로그아웃이 구현이 완료된다면 여기에 업로더 이름 넣기
         uploarder = "WinterHana"
         
-        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         # 2. 값 받아서 데이터베이스에 넣기
         try:
