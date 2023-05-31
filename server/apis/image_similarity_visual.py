@@ -17,7 +17,7 @@ import os
 import time
 
 def score_remix(_score):
-    return math.pow(_score, 10)
+    return math.pow(_score, 7)
 
 def replace_color(image, lower_color, upper_color):
     replacement_color = (0, 0, 0)  # 검정색
