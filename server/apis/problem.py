@@ -216,7 +216,7 @@ class problem_submit(Resource):
             return result
         
         # 이미지 유사도 성공 / 실패 판단하기
-        if(score > 0.98): 
+        if(score >= 0.90): 
             success = True
             fail_reason = '없음'
         else: 
