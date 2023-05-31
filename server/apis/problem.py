@@ -227,11 +227,12 @@ class problem_submit(Resource):
         try:
             
             lighthouse_url = 'http://15.164.150.247:3000/api/judge'
-            file = {
-                "html" : render_template('lighthouse.html' , html = html_code, css = css_code, js = js_code)
+            files = {
+                "html" : render_template('lighthouse_1.html' , html = html_code, css = css_code, js = js_code)
             }
-            print(file)
-            lighthouse_report = requests.post(lighthouse_url, files = file)
+            
+            lighthouse_report = requests.post(lighthouse_url, files = files)
+            print(files)
             
         except requests.exceptions.ConnectionError as e:
             # 4 - 1서버가 연결되지 않으면 예외처리
